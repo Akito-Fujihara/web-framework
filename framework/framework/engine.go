@@ -1,29 +1,46 @@
 package framework
 
 import (
+	"errors"
 	"net/http"
-
-	"github.com/Akito-Fujihara/framework/controllers"
 )
 
-type Engine struct{}
+type Engine struct {
+	Router *Router
+}
+
+func NewEngine() *Engine {
+	return &Engine{
+		Router: &Router{},
+	}
+}
+
+type Router struct {
+	RoutingTable map[string]func(http.ResponseWriter, *http.Request)
+}
+
+func (r *Router) Get(pathname string, handler func(http.ResponseWriter, *http.Request)) error {
+	if r.RoutingTable == nil {
+		r.RoutingTable = make(map[string]func(http.ResponseWriter, *http.Request))
+	}
+
+	if r.RoutingTable[pathname] != nil {
+		return errors.New("pathname is already registered")
+	}
+
+	r.RoutingTable[pathname] = handler
+	return nil
+}
 
 func (e *Engine) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		if r.URL.Path == "/students" {
-			controllers.StudentsController(rw, r)
+		handler := e.Router.RoutingTable[r.URL.Path]
+		if handler == nil {
+			rw.WriteHeader(http.StatusNotFound)
 			return
 		}
-
-		if r.URL.Path == "/lists" {
-			controllers.ListsController(rw, r)
-			return
-		}
-
-		if r.URL.Path == "/users" {
-			controllers.UsersController(rw, r)
-			return
-		}
+		handler(rw, r)
+		return
 	}
 }
 
