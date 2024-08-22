@@ -1,8 +1,11 @@
 package framework
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"path"
+	"strings"
 )
 
 type Engine struct {
@@ -22,6 +25,13 @@ type Router struct {
 }
 
 func (r *Router) Get(pathname string, handler func(http.ResponseWriter, *http.Request)) error {
+	pathname = strings.TrimSuffix(pathname, "/")
+	existedHandler := r.RoutingTable.Search(pathname)
+
+	if existedHandler != nil {
+		panic("already exists")
+	}
+
 	r.RoutingTable.Insert(pathname, handler)
 	return nil
 }
@@ -29,6 +39,7 @@ func (r *Router) Get(pathname string, handler func(http.ResponseWriter, *http.Re
 func (e *Engine) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		pathname := path.Clean(r.URL.Path)
+		pathname = strings.TrimSuffix(pathname, "/")
 		handler := e.Router.RoutingTable.Search(pathname)
 
 		if handler == nil {
@@ -41,5 +52,8 @@ func (e *Engine) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Engine) Run() {
-	http.ListenAndServe(":8080", e)
+	fmt.Println("Server is running on localhost:8085")
+	if err := http.ListenAndServe(":8085", e); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }

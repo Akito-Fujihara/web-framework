@@ -10,6 +10,7 @@ func main() {
 	router := engine.Router
 
 	router.Get("/lists", controllers.ListsController)
+	router.Get("/lists/:list_id", controllers.ListItemController)
 	router.Get("/users", controllers.UsersController)
 	router.Get("/students", controllers.StudentsController)
 

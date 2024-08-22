@@ -30,6 +30,14 @@ func ListsController(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(rw, "lists")
 }
 
+func ListItemController(rw http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(rw, "list_item")
+}
+
+func ListNameController(rw http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(rw, "list_name")
+}
+
 func UsersController(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(rw, "users")
 }
